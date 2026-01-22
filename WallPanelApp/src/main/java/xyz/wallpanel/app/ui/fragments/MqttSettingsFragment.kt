@@ -28,9 +28,11 @@ import androidx.preference.ListPreference
 import xyz.wallpanel.app.R
 import xyz.wallpanel.app.network.MQTTOptions
 import xyz.wallpanel.app.ui.activities.SettingsActivity
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class MqttSettingsFragment : BaseSettingsFragment(), SharedPreferences.OnSharedPreferenceChangeListener  {
 
     @Inject

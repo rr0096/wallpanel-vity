@@ -31,9 +31,11 @@ import android.view.View
 import androidx.navigation.Navigation
 import xyz.wallpanel.app.R
 import xyz.wallpanel.app.ui.activities.SettingsActivity
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 
+@AndroidEntryPoint
 class HttpSettingsFragment : BaseSettingsFragment() {
 
     private var httpRestPreference: SwitchPreference? = null
@@ -43,7 +45,6 @@ class HttpSettingsFragment : BaseSettingsFragment() {
 
 
     override fun onAttach(context: Context) {
-        AndroidSupportInjection.inject(this)
         super.onAttach(context)
         setHasOptionsMenu(true)
     }
