@@ -38,7 +38,7 @@ Rendering issues with the webpage you are trying to view. Android applications u
 - Streaming MJPEG server support using the device camera.
 - Screensaver feature that can be dismissed with motion or face detection.
 - Support for Android 4.4 (API level 19) and greater devices.
-- Support for launching external applications using intent URL
+- Support for launching external applications using intent URL.
 
 ## Hardware & Software
 
