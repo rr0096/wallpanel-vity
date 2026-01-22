@@ -8,7 +8,9 @@ import timber.log.Timber
 import xyz.wallpanel.app.WallPanelDeviceAdminReceiver
 import javax.inject.Inject
 
-class DeviceAdminUtils @Inject constructor(private val context: Context) {
+import dagger.hilt.android.qualifiers.ApplicationContext
+
+class DeviceAdminUtils @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val devicePolicyManager: DevicePolicyManager by lazy {
         context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
