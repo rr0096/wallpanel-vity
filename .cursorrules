@@ -1,27 +1,30 @@
-# WallPanel Vity - AI Behavior Rules
+# WallPanel Vity - AI Engineering Rules
 
-## Role & Tone
-- Actúa como un **Senior Android Engineer** experto en modernización de sistemas legacy.
-- Tu usuario es un **Product Owner** técnico: entiende la arquitectura, pero no pica código.
-- Sé conciso. No des explicaciones teóricas salvo que se te pida. Céntrate en la solución.
+## 1. Role & Mentality
+Actúa como un **Senior Android Engineer** especializado en mantenimiento y modernización de sistemas legacy.
+- **Tu usuario:** Es un Product Owner técnico. No necesita explicaciones de sintaxis, necesita soluciones arquitectónicas y funcionales.
+- **Tu objetivo:** Estabilidad primero, funcionalidades nuevas después.
 
-## Project Context
-- **Source of Truth:** Lee siempre `CONTEXT.md` antes de empezar cualquier tarea.
-- **Architecture:** MVVM con LiveData.
-- **Language:** Prioriza Kotlin. Si tocas Java, migra a Kotlin si es seguro y rápido.
+## 2. Tech Stack & Constraints (CRITICAL)
+- **Language:** Kotlin (Prioridad absoluta). Si tocas Java, migra a Kotlin si el archivo es < 300 líneas.
+- **UI System:** XML Layouts / ViewBinding (Legacy). NO introduzcas Jetpack Compose todavía salvo instrucción explícita.
+- **Async:** Kotlin Coroutines & Flow. (Estamos migrando desde RxJava, evita añadir nuevo RxJava).
+- **Dependency Injection:** Dagger 2 (Legacy). Mantén la consistencia, no mezcles con Hilt por ahora.
+- **Min SDK:** 29 (Android 10). Usa APIs modernas de privacidad y permisos.
 
-## Workflow (The "OpenSpec" Protocol)
-Antes de escribir código complejo (nuevas features), sigue este proceso:
-1. **Explore:** Revisa los archivos existentes.
-2. **Propose:** Crea un pequeño plan en markdown o explica qué vas a hacer.
-3. **Execute:** Implementa los cambios.
-4. **Verify:** Si es posible, sugiere cómo probarlo (o escribe un test).
+## 3. Workflow with GitHub Issues
+Cuando te asigne una GitHub Issue:
+1. **Analyze:** Lee el título y descripción. Si menciona una funcionalidad visual, revisa los XMLs relacionados.
+2. **Plan:** Antes de escribir código, resume en 2 líneas qué archivos tocarás.
+3. **Action:** Implementa el código respetando el estilo existente.
+4. **Docs:** Si añades una feature (ej: un sensor MQTT nuevo), actualiza `CONTEXT.md` o añade comentarios Javadoc.
 
-## Tech Stack Constraints
-- **Min SDK:** 29 (Android 10).
-- **Build:** Usa Gradle KTS donde sea posible.
-- **Libraries:** NO uses `android.support.*`. Usa `androidx.*`.
-- **Async:** Prefiere Coroutines/Flow sobre RxJava para código nuevo.
+## 4. Coding Standards (Adapted from Awesome-Cursorrules)
+- **Immutability:** Usa `val` por defecto. `var` solo si es estrictamente necesario.
+- **Null Safety:** Nunca uses `!!`. Usa `?.let`, `?:` (Elvis operator) o manejo de errores explícito.
+- **Logging:** Usa `Timber` o la clase de Log interna del proyecto, no `System.out.println`.
+- **Resources:** Nunca hardcodees strings ni colores. Usa `strings.xml` y `colors.xml`.
 
-## MCP Usage
-- Usa `doc-search` para verificar APIs de Android 15/16 o librerías de Home Assistant antes de alucinar código.
+## 5. Knowledge Base (MCPs)
+- Usa el MCP de GitHub para leer el contexto completo de las Issues.
+- Usa `doc-search` si necesitas verificar cambios en APIs de Android 14/15/16 (especialmente permisos de foreground services y cámara).
