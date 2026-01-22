@@ -29,9 +29,9 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import dagger.android.support.DaggerAppCompatActivity
 import timber.log.Timber
 import xyz.wallpanel.app.AppExceptionHandler
 import xyz.wallpanel.app.network.MQTTOptions
@@ -51,7 +51,7 @@ import xyz.wallpanel.app.utils.ScreenUtils
 import javax.inject.Inject
 
 
-abstract class BaseBrowserActivity : DaggerAppCompatActivity() {
+abstract class BaseBrowserActivity : AppCompatActivity() {
 
     @Inject
     lateinit var dialogUtils: DialogUtils

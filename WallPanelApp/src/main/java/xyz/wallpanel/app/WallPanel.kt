@@ -25,20 +25,14 @@ import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
 import androidx.multidex.MultiDex
 import dagger.android.AndroidInjector
-import dagger.android.support.DaggerApplication
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
-import xyz.wallpanel.app.di.DaggerApplicationComponent
 import xyz.wallpanel.app.utils.CrashlyticsDebugTree
 import xyz.wallpanel.app.utils.LauncherShortcuts
 import xyz.wallpanel.app.utils.WallpanelDebugTree
 
-
-class WallPanel : DaggerApplication() {
-
-
-    override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        return DaggerApplicationComponent.builder().create(this)
-    }
+@HiltAndroidApp
+class WallPanel : Application() {
 
     override fun onCreate() {
         super.onCreate()
