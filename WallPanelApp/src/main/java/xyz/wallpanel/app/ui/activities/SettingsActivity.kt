@@ -24,10 +24,12 @@ import android.view.MenuItem
 import xyz.wallpanel.app.R
 import xyz.wallpanel.app.persistence.Configuration
 import xyz.wallpanel.app.utils.DialogUtils
-import dagger.android.support.DaggerAppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
-class SettingsActivity : DaggerAppCompatActivity() {
+@AndroidEntryPoint
+class SettingsActivity : AppCompatActivity() {
 
     @Inject
     lateinit var configuration: Configuration

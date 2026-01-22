@@ -34,12 +34,14 @@ import xyz.wallpanel.app.modules.CameraCallback
 import xyz.wallpanel.app.persistence.Configuration
 import xyz.wallpanel.app.ui.DetectionViewModel
 import xyz.wallpanel.app.ui.views.CameraSourcePreview
-import dagger.android.support.DaggerAppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import timber.log.Timber
 import xyz.wallpanel.app.databinding.ActivityLiveCameraBinding
 import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
-class LiveCameraActivity : DaggerAppCompatActivity() {
+@AndroidEntryPoint
+class LiveCameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLiveCameraBinding
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory

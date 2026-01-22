@@ -49,10 +49,12 @@ import xyz.wallpanel.app.BuildConfig
 import xyz.wallpanel.app.R
 import timber.log.Timber
 import java.net.URISyntaxException
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
+@AndroidEntryPoint
 class BrowserActivityNative : BaseBrowserActivity(), LifecycleObserver, WebClientCallback {
 
     private lateinit var webView: WebView

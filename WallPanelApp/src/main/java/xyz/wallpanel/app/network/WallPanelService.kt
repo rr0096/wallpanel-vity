@@ -46,6 +46,10 @@ import org.json.JSONObject
 import timber.log.Timber
 import xyz.wallpanel.app.R
 import xyz.wallpanel.app.modules.*
+import xyz.wallpanel.app.network.model.MqttState
+import xyz.wallpanel.app.network.repository.MqttRepository
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import xyz.wallpanel.app.persistence.Configuration
 import xyz.wallpanel.app.ui.activities.BaseBrowserActivity.Companion.BROADCAST_ACTION_CLEAR_BROWSER_CACHE
 import xyz.wallpanel.app.ui.activities.BaseBrowserActivity.Companion.BROADCAST_ACTION_JS_EXEC
@@ -82,7 +86,7 @@ import javax.inject.Inject
 
 
 // TODO move this to internal class within application, no longer run as service
-class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
+class WallPanelService : LifecycleService() {
 
     @Inject
     lateinit var configuration: Configuration
@@ -112,7 +116,10 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
     private val faceClearHandler = Handler(Looper.getMainLooper())
     private val wakeScreenHandler = Handler(Looper.getMainLooper())
     private var textToSpeechModule: TextToSpeechModule? = null
-    private var mqttModule: MQTTModule? = null
+
+    @Inject
+    lateinit var mqttRepository: MqttRepository
+
     private var connectionLiveData: ConnectionLiveData? = null
     private var hasNetwork = AtomicBoolean(true)
     private var motionDetected: Boolean = false
@@ -131,7 +138,7 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
         mqttAlertMessageShown = false
         mqttConnecting = false
         //sendToastMessage(getString(R.string.toast_connect_retry))
-        mqttModule?.restart()
+        mqttRepository.restart()
     }
 
     inner class WallPanelServiceBinder : Binder() {
@@ -189,14 +196,30 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
         filter.addAction(Intent.ACTION_USER_PRESENT)
         localBroadCastManager = LocalBroadcastManager.getInstance(this)
         localBroadCastManager?.registerReceiver(mBroadcastReceiver, filter)
+
+        lifecycleScope.launch {
+            mqttRepository.state.collect { state ->
+                when (state) {
+                    is MqttState.Connected -> handleMqttConnected()
+                    is MqttState.Disconnected -> handleMqttDisconnected()
+                    is MqttState.Error -> handleMqttException(state.message)
+                    is MqttState.Connecting -> { /* Optional handling */ }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            mqttRepository.message.collect { message ->
+                Timber.i("onMQTTMessage: ${message.id}, ${message.topic}, ${message.payload}")
+                processCommand(message.payload)
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mqttModule?.let {
-            it.pause()
-            mqttModule = null
-        }
+        mqttRepository.disconnect()
+
         if (localBroadCastManager != null) {
             localBroadCastManager?.unregisterReceiver(mBroadcastReceiver)
         }
@@ -262,19 +285,15 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
     }
 
     private fun handleNetworkConnect() {
-        mqttModule?.let {
-            if (!hasNetwork()) {
-                it.restart()
-            }
+        if (!hasNetwork()) {
+            mqttRepository.restart()
         }
         hasNetwork.set(true)
     }
 
     private fun handleNetworkDisconnect() {
-        mqttModule?.let {
-            if (hasNetwork()) {
-                it.pause()
-            }
+        if (hasNetwork()) {
+            mqttRepository.disconnect()
         }
         hasNetwork.set(false)
     }
@@ -322,13 +341,10 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
 
     private fun configureMqtt() {
         Timber.d("configureMqtt")
-        if (mqttModule == null && mqttOptions.isValid) {
-            mqttModule = MQTTModule(this@WallPanelService.applicationContext, mqttOptions, this@WallPanelService)
-            lifecycle.addObserver(mqttModule!!)
-        }
+        mqttRepository.connect()
     }
 
-    override fun onMQTTConnect() {
+    private fun handleMqttConnected() {
         Timber.w("onMQTTConnect")
         if (mqttAlertMessageShown) {
             clearAlertMessage() // clear any dialogs
@@ -346,17 +362,17 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
         mqttInitConnection.set(false)
     }
 
-    override fun onMQTTDisconnect() {
+    private fun handleMqttDisconnected() {
         Timber.e("onMQTTDisconnect")
-        handleMQTTDisconnected()
+        processMqttDisconnect()
     }
 
-    override fun onMQTTException(message: String) {
+    private fun handleMqttException(message: String) {
         Timber.e("onMQTTException: $message")
-        handleMQTTDisconnected()
+        processMqttDisconnect()
     }
 
-    private fun handleMQTTDisconnected() {
+    private fun processMqttDisconnect() {
         if (hasNetwork()) {
             if (mqttInitConnection.get()) {
                 mqttInitConnection.set(false)
@@ -371,17 +387,14 @@ class WallPanelService : LifecycleService(), MQTTModule.MQTTListener {
         }
     }
 
-    override fun onMQTTMessage(id: String, topic: String, payload: String) {
-        Timber.i("onMQTTMessage: $id, $topic, $payload")
-        processCommand(payload)
-    }
+
 
     private fun publishCommand(command: String, data: JSONObject) {
         publishMessage("${configuration.mqttBaseTopic}${command}", data.toString(), false)
     }
 
     private fun publishMessage(topic: String, message: String, retain: Boolean) {
-        mqttModule?.publish(topic, message, retain)
+        mqttRepository.publish(topic, message, retain)
     }
 
     private fun configureCamera() {
