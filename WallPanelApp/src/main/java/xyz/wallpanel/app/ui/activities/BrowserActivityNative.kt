@@ -57,6 +57,9 @@ import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class BrowserActivityNative : BaseBrowserActivity(), LifecycleObserver, WebClientCallback {
 
+    @Inject
+    lateinit var deviceAdminUtils: xyz.wallpanel.app.utils.DeviceAdminUtils
+
     private lateinit var webView: WebView
     private lateinit var binding: ActivityBrowserBinding
     private var certPermissionsShown = false
@@ -164,6 +167,12 @@ class BrowserActivityNative : BaseBrowserActivity(), LifecycleObserver, WebClien
 
         if (configuration.hasSettingsUpdates()) {
             initWebPageLoad()
+        }
+
+        if (configuration.lockTaskEnabled) {
+            deviceAdminUtils.startLockTask(this)
+        } else {
+            deviceAdminUtils.stopLockTask(this)
         }
     }
 
