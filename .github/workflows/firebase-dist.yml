@@ -3,7 +3,7 @@ name: Distribute to Firebase
 on:
   push:
     branches:
-      - mster
+      - master
 
 jobs:
   build-and-distribute:
